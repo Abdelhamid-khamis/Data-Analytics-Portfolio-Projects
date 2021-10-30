@@ -43,3 +43,59 @@ WHERE (
 )
 group by location
 ORDER BY mean_deaths_percentage_per_case desc
+
+-- Looking at the percentage of covid cases Vs population(Covid Cases percentage for a specific country)
+
+SELECT date, location, population, total_cases, (total_cases / population) *100 as cases_percentage
+FROM ['CovidDeaths$']
+WHERE location like 'egy%'
+ORDER BY cases_percentage desc, date desc;
+
+
+-- Looking at the percentage of new covid cases Vs population(New Covid Cases percentage for a specific country)
+
+SELECT date, location, population, new_cases, (new_cases / population) * 100 as new_cases_percentage
+FROM ['CovidDeaths$']
+WHERE location like 'egy%'
+ORDER BY new_cases desc, date desc;
+
+
+-- Finding the country with the highest infection rate(total cases / population) compared to population
+
+SELECT location, population, MAX(total_cases) as highest_infection_count, MAX((total_cases / population)) * 100 
+as percentage_of_population_infected
+FROM ['CovidDeaths$']
+GROUP BY location, population
+ORDER BY percentage_of_population_infected desc;
+
+
+-- Finding the country with the highest infection rate in more than 100M Countries' population
+
+SELECT location, population, MAX(total_cases) as highest_infection_count, MAX((total_cases / population)) * 100 
+as percentage_of_population_infected
+FROM ['CovidDeaths$']
+WHERE	population > 100000000 AND 
+		location NOT IN ('North America','South America','Europe','European Union','World','Asia','Africa')
+GROUP BY location, population
+ORDER BY percentage_of_population_infected desc;
+
+
+-- Finding the Countries with the highest total deaths
+-- we'll find that total_deaths col is nvar char so, we need to cast it to int
+
+SELECT location, population, MAX(cast(total_deaths as int)) as highest_total_deaths
+FROM ['CovidDeaths$']
+WHERE	 
+		continent IS NOT null
+GROUP BY location, population
+ORDER BY highest_total_deaths desc;
+
+-- LET'S BREAK DOWN THINGS BY CONTINENT
+
+
+SELECT location, MAX(cast(total_deaths as int)) as highest_total_deaths
+FROM ['CovidDeaths$']
+WHERE	 
+		continent IS null
+GROUP BY location
+ORDER BY highest_total_deaths desc;
